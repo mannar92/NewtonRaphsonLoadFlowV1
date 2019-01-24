@@ -13,7 +13,7 @@ public class AdmittanceMatrix {
 
     //private double[][] yMatrix;
     private Complex[] diagonalElements;
-    public Complex[][] yMatrix;
+    private Complex[][] yMatrix;
 
 
 
@@ -58,7 +58,7 @@ public class AdmittanceMatrix {
 
         for (int i=0; i<yMatrix.length; i++){
             System.out.println("Bus 1 admittance line: ");
-            System.out.println("Y" + 1 + i + " = " + yMatrix[0][i]);
+            System.out.println("Y" + 1 + (i+1) + " = " + yMatrix[0][i]);
             System.out.println();
         }
         return yMatrix;
@@ -66,6 +66,7 @@ public class AdmittanceMatrix {
 
     // sets an array of Complex objects representing the diagonal elements of the admittance matrix.
     private void setDiagonalElements(Branch line, Complex admittance) {
+        /* TEST TEST
         if (line.getFromBusID() == 1){
             System.out.println("Admittance " + line.getFromBusID() + "to bus " + line.getToBusID() + " = " + admittance);
             System.out.println();
@@ -78,8 +79,7 @@ public class AdmittanceMatrix {
         if (line.getFromBusID() == 29){
             System.out.println("Admittance " + line.getFromBusID() + "to bus " + line.getToBusID() + " = " + admittance);
             System.out.println();
-        }
-
+        } */
 
         switch ((int) line.getFromBusID()){
             case 1:
@@ -177,7 +177,14 @@ public class AdmittanceMatrix {
     private void setOffDiagonalElement(Branch line, Complex admittance) {
         int from = (int) line.getFromBusID();
         int to = (int) line.getToBusID();
+        int id = line.getLineIndex();
 
-        yMatrix[from - 1][to - 1] = admittance.negate(); // -admittance
+        Complex zeroComplex = new Complex (0, 0);
+
+        if (yMatrix[from - 1][to - 1].equals(zeroComplex)){
+            yMatrix[from - 1][to - 1] = admittance.negate(); // -admittance
+        } else {
+           yMatrix[from - 1][to - 1] = yMatrix[from - 1][to - 1].add(admittance.negate());
+        }
     }
 }
