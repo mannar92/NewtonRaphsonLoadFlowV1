@@ -1,4 +1,5 @@
 import Analysis.AdmittanceMatrix;
+import Analysis.PowerFlowEquations;
 import com.jmatio.io.MatFileReader;
 import com.jmatio.types.MLNumericArray;
 import constants.Constants;
@@ -55,17 +56,26 @@ public class OptimalPowerFlowAC {
         System.out.println("Branch 99 resistance: "+branch[98].getResistance());
         System.out.println();
 
-        AdmittanceMatrix matrix = new AdmittanceMatrix();
-        matrix.setAdmittanceMatrix(bus, branch);
+        AdmittanceMatrix yMatrix = new AdmittanceMatrix(bus, branch);
 
-        /*
-        System.out.println("====================================================================");
-        System.out.println("====================================================================");
-        System.out.println("TEST");
-        System.out.println("====================================================================");
-        System.out.println("====================================================================");
-        System.out.println("Bus 2 Reactive Power Demand (MVAr): "+bus[1].getReactivePowerDemand());
-        System.out.println("Bus 29 Reactive Power Demand (MVAr): "+bus[28].getReactivePowerDemand());*/
+        double[][] testConductance = yMatrix.getConductance();
+        double[][] testSusceptance = yMatrix.getSusceptance();
+
+        System.out.println("Ymatrix element 00 " + yMatrix.getyMatrixElement(1,1));
+        System.out.println("Real of element 00 " + testConductance[0][0]);
+        System.out.println("Real of element 01 " + testConductance[0][1]);
+        System.out.println("Real of element 02 " + testConductance[0][2]);
+        System.out.println("Real of element 03 " + testConductance[0][3]);
+        System.out.println("Imaginary of element 00 " + testSusceptance[0][0]);
+        System.out.println("Imaginary of element 01 " + testSusceptance[0][1]);
+        System.out.println("Imaginary of element 02 " + testSusceptance[0][2]);
+        System.out.println("Imaginary of element 03 " + testSusceptance[0][3]);
+        System.out.println();
+
+        PowerFlowEquations[] equationSet = new PowerFlowEquations[bus.length];
+        for (int i=0; i<bus.length; i++ ){
+            equationSet[i] = new PowerFlowEquations(yMatrix, bus[i], branch, generation);
+        }
 
         simulationTimer(System.nanoTime()-timer);
     }   // end main

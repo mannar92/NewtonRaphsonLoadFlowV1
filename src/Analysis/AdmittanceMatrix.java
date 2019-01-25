@@ -6,38 +6,32 @@ import networkModel.Bus;
 
 public class AdmittanceMatrix {
 
-    private double real;
-    private double imaginary;
-    private double resistance;
-    private double reactance;
+    private double[][] conductance;
+    private double[][] susceptance;
 
     //private double[][] yMatrix;
     private Complex[] diagonalElements;
+
     private Complex[][] yMatrix;
 
 
 
-    public Complex[][] setAdmittanceMatrix (Bus[] bus, Branch[] branch){
+    public AdmittanceMatrix(Bus[] bus, Branch[] branch){
        // yMatrix = new double[bus.length][bus.length];
         diagonalElements = new Complex[bus.length];
 
-        for (int i=0; i<diagonalElements.length; i++){
-            diagonalElements[i] = new Complex(0,0);
-        }
-
         yMatrix = new Complex[diagonalElements.length][diagonalElements.length];
 
-        for (int i=0; i<diagonalElements.length; i++){
-            for (int j=0; j<diagonalElements.length; j++){
-                yMatrix[i][j] = new Complex (0, 0);
-            }
-        }
+        conductance = new double[bus.length][bus.length];
+        susceptance = new double[bus.length][bus.length];
+
+        setArraysToZero();
 
         for (Branch line: branch){
-            resistance = line.getResistance();
-            reactance = line.getReactance();
-            real = resistance/(resistance*resistance + reactance*reactance);
-            imaginary = -reactance/(resistance*resistance + reactance*reactance);
+            double resistance = line.getResistance();
+            double reactance = line.getReactance();
+            double real = resistance / (resistance * resistance + reactance * reactance);
+            double imaginary = -reactance / (resistance * resistance + reactance * reactance);
 
             Complex admittance = new Complex(real, imaginary);
 
@@ -61,27 +55,54 @@ public class AdmittanceMatrix {
             System.out.println("Y" + 1 + (i+1) + " = " + yMatrix[0][i]);
             System.out.println();
         }
-        return yMatrix;
+        setConductance();
+        setSusceptance();
+    }
+
+    private void setArraysToZero() {
+        for (int i=0; i<diagonalElements.length; i++){
+            diagonalElements[i] = new Complex(0,0);
+        }
+
+        for (int i=0; i<diagonalElements.length; i++){
+            for (int j=0; j<diagonalElements.length; j++){
+                yMatrix[i][j] = new Complex (0, 0);
+            }
+        }
+
+        for (int i=0; i<conductance.length; i++){
+            for (int j=0; j<conductance.length; j++){
+                conductance[i][j] = 0.0;
+            }
+        }
+
+        for (int i=0; i<susceptance.length; i++){
+            for (int j=0; j<susceptance.length; j++){
+                susceptance[i][j] = 0.0;
+            }
+        }
+    }
+
+    private void setSusceptance() {
+        for (int i=0; i<yMatrix.length; i++){
+            for (int j=0; j<yMatrix.length; j++){
+                susceptance[i][j] = yMatrix[i][j].getImaginary();
+            }
+        }
+    }
+
+    private void setConductance() {
+        for (int i=0; i<yMatrix.length; i++){
+            for (int j=0; j<yMatrix.length; j++){
+                conductance[i][j] = yMatrix[i][j].getReal();
+            }
+        }
     }
 
     // sets an array of Complex objects representing the diagonal elements of the admittance matrix.
     private void setDiagonalElements(Branch line, Complex admittance) {
-        /* TEST TEST
-        if (line.getFromBusID() == 1){
-            System.out.println("Admittance " + line.getFromBusID() + "to bus " + line.getToBusID() + " = " + admittance);
-            System.out.println();
-        }
-        if (line.getFromBusID() == 10){
-            System.out.println("Admittance " + line.getFromBusID() + "to bus " + line.getToBusID() + " = " + admittance);
-            System.out.println();
-        }
 
-        if (line.getFromBusID() == 29){
-            System.out.println("Admittance " + line.getFromBusID() + "to bus " + line.getToBusID() + " = " + admittance);
-            System.out.println();
-        } */
-
-        switch ((int) line.getFromBusID()){
+       switch ((int) line.getFromBusID()){
             case 1:
                 diagonalElements[0] = diagonalElements[0].add(admittance);
                 break;
@@ -175,16 +196,32 @@ public class AdmittanceMatrix {
     }
 
     private void setOffDiagonalElement(Branch line, Complex admittance) {
-        int from = (int) line.getFromBusID();
-        int to = (int) line.getToBusID();
-        int id = line.getLineIndex();
+        int fromBus = (int) line.getFromBusID();
+        int toBus = (int) line.getToBusID();
 
         Complex zeroComplex = new Complex (0, 0);
 
-        if (yMatrix[from - 1][to - 1].equals(zeroComplex)){
-            yMatrix[from - 1][to - 1] = admittance.negate(); // -admittance
+        if (yMatrix[fromBus - 1][toBus - 1].equals(zeroComplex)){
+            yMatrix[fromBus - 1][toBus - 1] = admittance.negate(); // -admittance
         } else {
-           yMatrix[from - 1][to - 1] = yMatrix[from - 1][to - 1].add(admittance.negate());
+           yMatrix[fromBus - 1][toBus - 1] =
+                   yMatrix[fromBus - 1][toBus - 1].add(admittance.negate());
         }
+    }
+
+    public Complex[][] getyMatrix() {
+        return yMatrix;
+    }
+
+    public double[][] getConductance() {
+        return conductance;
+    }
+
+    public double[][] getSusceptance() {
+        return susceptance;
+    }
+
+    public Complex getyMatrixElement(int fromBus, int toBus) {
+        return yMatrix[fromBus - 1][toBus - 1];
     }
 }
