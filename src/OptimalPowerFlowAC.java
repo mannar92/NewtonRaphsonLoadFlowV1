@@ -74,7 +74,7 @@ public class OptimalPowerFlowAC {
 
         PowerFlowEquations[] equationSet = new PowerFlowEquations[bus.length];
         for (int i=0; i<bus.length; i++ ){
-            equationSet[i] = new PowerFlowEquations(yMatrix, bus[i], branch, generation);
+            equationSet[i] = new PowerFlowEquations(yMatrix, bus, branch, generation, i);
         }
 
         simulationTimer(System.nanoTime()-timer);
