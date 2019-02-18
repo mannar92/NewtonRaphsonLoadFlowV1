@@ -6,13 +6,15 @@ import networkModel.Generation;
 
 public class JacobianMatrix {
 
+    private double numOfBuses;
+    private final double[] deltaPower;
     private double[][] jac;  // jacobian matrix
 
 
-    public JacobianMatrix(AdmittanceMatrix admittanceMatrix, Bus[] bus,
-                          Branch[] branch, Generation[] generations,
-                          PowerFlowEquations[] powerFlowEquations) {
+    public JacobianMatrix(AdmittanceMatrix admittanceMatrix, Bus[] bus, double[] power) {
 
+        numOfBuses = bus.length;
+        deltaPower = new double[bus.length];
         jac = new double[bus.length*2][bus.length*2];
 
         // number of but k
@@ -56,6 +58,15 @@ public class JacobianMatrix {
                     jac[k +bus.length][i +bus.length] += -bki * vk * vk;
                 }
             }
+        }
+        
+        //setDeltaPower(power);
+    }
+
+    private void setDeltaPower(Double power) {
+        for (int i=0; i<numOfBuses; i++){
+            //deltaPower[i] =
+            //deltaPower[i+numOfBuses] =
         }
     }
 

@@ -1,4 +1,5 @@
 import Analysis.AdmittanceMatrix;
+import Analysis.JacobianMatrix;
 import Analysis.PowerFlowEquations;
 import com.jmatio.io.MatFileReader;
 import com.jmatio.types.MLNumericArray;
@@ -72,10 +73,13 @@ public class OptimalPowerFlowAC {
         System.out.println("Imaginary of element 03 " + testSusceptance[0][3]);
         System.out.println();
 
-        PowerFlowEquations[] equationSet = new PowerFlowEquations[bus.length];
-        for (int i=0; i<bus.length; i++ ){
-            equationSet[i] = new PowerFlowEquations(yMatrix, bus, branch, generation, i);
-        }
+        System.out.println(branch[0].getToBusID());
+        System.out.println(branch[1].getToBusID());
+        System.out.println(branch[2].getToBusID());
+        System.out.println(branch[3].getToBusID());
+        //PowerFlowEquations powerFlowEquations = new PowerFlowEquations(yMatrix, bus, branch, generation);
+        //JacobianMatrix jacobian = new JacobianMatrix(yMatrix, bus, powerFlowEquations.getPower());
+
 
         simulationTimer(System.nanoTime()-timer);
     }   // end main
