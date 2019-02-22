@@ -13,4 +13,9 @@ public class MathToolkit {
         return sum;
     }
 
+    public static double roundDouble(double number, int decimal){
+        return Math.round(number * Math.pow(10, (double)decimal))
+                / Math.pow(10, (double) decimal);
+    }
+
 }

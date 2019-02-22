@@ -1,6 +1,4 @@
-import Analysis.AdmittanceMatrix;
-import Analysis.JacobianMatrix;
-import Analysis.PowerFlowEquations;
+import Analysis.*;
 import com.jmatio.io.MatFileReader;
 import com.jmatio.types.MLNumericArray;
 import constants.Constants;
@@ -44,42 +42,8 @@ public class OptimalPowerFlowAC {
 
         printNumberOfElements(bus.length, generation.length, branch.length);
 
-
-        System.out.println("Bus 2 Reactive Power Demand (MVAr): "+bus[1].getReactivePowerDemand());
-        System.out.println("Bus 29 Reactive Power Demand (MVAr): "+bus[28].getReactivePowerDemand());
-
-        System.out.println("Generation 2 max Reactive Power Output (MVAr): " + generation[1].getMaxReactivePowerOutput());
-        System.out.println("Generation 51 max Reactive Power Output (MVAr): " + generation[50].getMaxReactivePowerOutput());
-
-        System.out.println("Branch 1 reactance: "+branch[0].getReactance());
-        System.out.println("Branch 1 resistance: "+branch[0].getResistance());
-        System.out.println("Branch 99 reactance: "+branch[98].getReactance());
-        System.out.println("Branch 99 resistance: "+branch[98].getResistance());
-        System.out.println();
-
-        AdmittanceMatrix yMatrix = new AdmittanceMatrix(bus, branch);
-
-        double[][] testConductance = yMatrix.getConductance();
-        double[][] testSusceptance = yMatrix.getSusceptance();
-
-        System.out.println("Ymatrix element 00 " + yMatrix.getyMatrixElement(1,1));
-        System.out.println("Real of element 00 " + testConductance[0][0]);
-        System.out.println("Real of element 01 " + testConductance[0][1]);
-        System.out.println("Real of element 02 " + testConductance[0][2]);
-        System.out.println("Real of element 03 " + testConductance[0][3]);
-        System.out.println("Imaginary of element 00 " + testSusceptance[0][0]);
-        System.out.println("Imaginary of element 01 " + testSusceptance[0][1]);
-        System.out.println("Imaginary of element 02 " + testSusceptance[0][2]);
-        System.out.println("Imaginary of element 03 " + testSusceptance[0][3]);
-        System.out.println();
-
-        System.out.println(branch[0].getToBusID());
-        System.out.println(branch[1].getToBusID());
-        System.out.println(branch[2].getToBusID());
-        System.out.println(branch[3].getToBusID());
-        //PowerFlowEquations powerFlowEquations = new PowerFlowEquations(yMatrix, bus, branch, generation);
-        //JacobianMatrix jacobian = new JacobianMatrix(yMatrix, bus, powerFlowEquations.getPower());
-
+        NewtonRaphsonLoadFlow nrpf = new NewtonRaphsonLoadFlow(5, 100,
+                100, false);
 
         simulationTimer(System.nanoTime()-timer);
     }   // end main

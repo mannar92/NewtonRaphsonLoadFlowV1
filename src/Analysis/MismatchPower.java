@@ -33,6 +33,13 @@ public class MismatchPower {
         realPowerSpecified = setRealPowerSpecified(admittanceMatrix, bus, generations, branches);
         reactivePowerInj = setReactivePowerSpecified(admittanceMatrix, bus, generations, branches);
 
+        for (int i=0; i<numOfBuses; i++) {
+            powerInj[i] = realPowerInj[i];
+            powerInj[i+numOfBuses] = reactivePowerInj[i];
+            powerSpecified[i] = realPowerSpecified[i];
+            powerSpecified[i+numOfBuses] = reactivePowerInj[i];
+            deltaPower[i] = powerSpecified[i] - powerInj[i];
+        }
     }
 
     private double[] setReactivePowerSpecified(AdmittanceMatrix admittanceMatrix, Bus[] bus,
@@ -43,6 +50,10 @@ public class MismatchPower {
                 if(bus[k].getBusID()==generation.getBusID()){
                     reactivePowerSpecified[k] += generation.getRealPowerOutput();
                 }
+            }
+            // set reactive power generation to the corresponding bus
+            for (int i=0; i<bus.length; i++){
+                bus[i].setReactivePowerGeneration(reactivePowerSpecified[i]);
             }
             reactivePowerSpecified[k] -= bus[k].getReactivePowerDemand();
         }
@@ -57,8 +68,14 @@ public class MismatchPower {
                     realPowerSpecified[k] += generation.getRealPowerOutput();
                 }
             }
+            // set real power generation to the corresponding bus
+            for (int i=0; i<bus.length; i++){
+                bus[i].setRealPowerGeneration(realPowerSpecified[i]);
+            }
             realPowerSpecified[k] -= bus[k].getRealPowerDemand();
         }
+
+
         return realPowerSpecified;
     }
 
@@ -112,5 +129,15 @@ public class MismatchPower {
         return realPowerInj;
     }
 
+    public double[] getPowerSpecified() {
+        return powerSpecified;
+    }
 
+    public double[] getPowerInj() {
+        return powerInj;
+    }
+
+    public double[] getDeltaPower() {
+        return deltaPower;
+    }
 }

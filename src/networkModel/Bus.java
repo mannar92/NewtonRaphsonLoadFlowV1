@@ -2,20 +2,22 @@ package networkModel;
 
 public final class Bus {
 
-    private final int busIndex;
-    private final double busID;
-    private final double busType;
-    private final double realPowerDemand;
-    private final double reactivePowerDemand;
-    private final double shuntConductance;
-    private final double shuntSuceptance;
-    private final double busArea;
-    private final double voltageMagnitude;
-    private final double voltageAngle;
-    private final double baseVoltage;
-    private final double lossZone;
-    private final double maxVoltage;
-    private final double minVoltage;
+    private int busIndex;
+    private double busID;
+    private double busType;
+    private double realPowerDemand;
+    private double reactivePowerDemand;
+    private double shuntConductance;
+    private double shuntSuceptance;
+    private double busArea;
+    private double voltageMagnitude;
+    private double voltageAngle;
+    private double baseVoltage;
+    private double lossZone;
+    private double maxVoltage;
+    private double minVoltage;
+    private double realPowerGeneration;
+    private double reactivePowerGeneration;
 
     private int busCounter =0;
 
@@ -91,5 +93,41 @@ public final class Bus {
 
     public double getLossZone() {
         return lossZone;
+    }
+
+    public boolean isGenerationBus() {
+        return busType == 2;
+    }
+
+    public boolean isLoadBus() {
+        return busType == 1;
+    }
+
+    public boolean isSlackBus(){
+        return  busType == 3;
+    }
+
+    public void setRealPowerDemand(double realPowerDemand) {
+        this.realPowerDemand = realPowerDemand;
+    }
+
+    public void setReactivePowerDemand(double reactivePowerDemand) {
+        this.reactivePowerDemand = reactivePowerDemand;
+    }
+
+    public void setVoltageMagnitude(double voltageMagnitude) {
+        this.voltageMagnitude = voltageMagnitude;
+    }
+
+    public void setVoltageAngle(double voltageAngle) {
+        this.voltageAngle = voltageAngle;
+    }
+
+    public void setRealPowerGeneration(double realPowerGeneration) {
+        this.realPowerGeneration = realPowerGeneration;
+    }
+
+    public void setReactivePowerGeneration(double reactivePowerGeneration) {
+        this.reactivePowerGeneration = reactivePowerGeneration;
     }
 }
