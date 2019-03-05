@@ -36,14 +36,15 @@ public class OptimalPowerFlowAC {
         parseMatData();
 
         //  create arrays of objects representing the elements of the GB power system (Generators, buses, lines)
-        Bus[] bus = createBusObjectArray();
         Generation[] generation = createGenerationObjectArray();
+        Bus[] bus = createBusObjectArray();
         Branch[] branch = createBranchObjectArray();
 
         printNumberOfElements(bus.length, generation.length, branch.length);
 
         NewtonRaphsonLoadFlow nrpf = new NewtonRaphsonLoadFlow(5, 100,
-                100, false);
+                0.001, false);
+        nrpf.solve(bus, generation, branch);
 
         simulationTimer(System.nanoTime()-timer);
     }   // end main

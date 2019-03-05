@@ -29,7 +29,7 @@ public class NewtonRaphsonLoadFlow {
     public NewtonRaphsonLoadFlow(int maxIterations, double adjustError,
                                  double convergeError, boolean enfoceReactiveLimits) {
         this.maxIterations = maxIterations;
-        //this.adjustError = adjustError;
+        this.adjustError = adjustError;
         this.convergeError = convergeError;
         this.enforceReactiveLimits = enfoceReactiveLimits;
     }
@@ -40,6 +40,7 @@ public class NewtonRaphsonLoadFlow {
 
        //determine Y-Matrix
         AdmittanceMatrix yMatrix = new AdmittanceMatrix(bus,branch);
+        yMatrix.printMatrix();
 
         //starts NR algorithm
         for(int i=0; i<maxIterations; i++){
@@ -48,33 +49,99 @@ public class NewtonRaphsonLoadFlow {
             System.out.printf("Number of Iteration: "+iterations);
             System.out.println();
 
+            JacobianMatrixTest jacobian = new JacobianMatrixTest(yMatrix, bus, generation, branch);
+            jacobian.printJac();
+            deltaPower = jacobian.getDeltaPower();
+
+
+
+            if (convergeCheck(bus) || iterations == maxIterations){
+                for (int k=0; k<bus.length; k++) {
+                    bus[k].setRealPowerGeneration(jacobian.getDeltaPower()[k]);
+                    bus[k].setReactivePowerGeneration(jacobian.getDeltaPower()[k+bus.length]);
+                }
+                break;
+            }
+            //jacInverse = determineMatrixInverse(jacobian.getJac());
+            //deltaVoltage = determineMatrixMultiplication(jacInverse, deltaPower);
+
+            //updateVoltageValues(bus, deltaVoltage);
+
+
             /*
              * Power values and the Jacobian matrix are calculated using
              * current voltage values and system impedance values.
-             */
+
             MismatchPower mismatchPower = new MismatchPower(yMatrix, bus, generation, branch);
+            mismatchPower.print();
             JacobianMatrix jacobian = new JacobianMatrix(yMatrix, bus);
 
-
             deltaPower = mismatchPower.getDeltaPower();
-            jacInverse = determineMatrixInverse(jacobian.getJac());
 
             if (convergeCheck(bus) || iterations == maxIterations){
-                for (int i=0; i<bus.length; i++) {
-                    bus[i].setRealPowerGeneration(mismatchPower.getPowerInj()[i]);
-                    bus[i].setReactivePowerGeneration(mismatchPower.getPowerInj()[i+bus.length]);
+                for (int k=0; k<bus.length; k++) {
+                    bus[k].setRealPowerGeneration(mismatchPower.getPowerInj()[k]);
+                    bus[k].setReactivePowerGeneration(mismatchPower.getPowerInj()[k+bus.length]);
                 }
+                break;
             }
 
+           // zeroJacElements(jacobian, bus);
+
+            jacobian.printJac();
+
+            jacInverse = determineMatrixInverse(jacobian.getJac());
             deltaVoltage = determineMatrixMultiplication(jacInverse, deltaPower);
 
             updateVoltageValues(bus, deltaVoltage);
+            */
         }
         return false;
     }
 
+    private void simplifyJac() {
+    }
+
+    private void zeroJacElements(JacobianMatrix jacobian, Bus[] bus) {
+
+        for (int k=0; k<bus.length; k++){
+            // zero P and Q elements for the slack bus
+            if (bus[k].isSlackBus()){
+                for (int i=0; i<bus.length; i++){
+                    jacobian.setJac(k, i, 0.0);                                 // partial P/theta
+                    jacobian.setJac(k, (i+bus.length), 0.0);                    // partial P/V
+                    jacobian.setJac((k+bus.length), i, 0.0);                    // partial Q/theta
+                    jacobian.setJac((k+bus.length), (i+bus.length), 0.0);       // partial Q/V
+                    jacobian.setJac((i+bus.length), k, 0.0);
+                    jacobian.setJac(i, (k+bus.length), 0.0);
+                    jacobian.setJac((i+bus.length), (k+bus.length), 0.0);
+                    jacobian.setJac(i, k, 0.0);
+                    //jacobian.setJac(k, k, 1e+10);
+                    //  jacobian.setJac((k+bus.length), (k+bus.length), 1e+10);
+                }
+            }
+
+
+            if (bus[k].isGenerationBus()){
+                for (int i=0; i<bus.length; i++){
+                    //jacobian.setJac(k, i, 0.0);                                      // partial P/theta
+                    //jacobian.setJac(k, (i+bus.length), 0.0);                    // partial P/V
+                    //jacobian.setJac((k+bus.length), i, 0.0);                        // partial Q/theta
+                    jacobian.setJac((k+bus.length), (i+bus.length), 0.0);      // partial Q/V
+                    jacobian.setJac((i+bus.length), k, 0.0);
+                    jacobian.setJac((k+bus.length), i, 0.0);
+
+                    //jacobian.setJac(i, (k+bus.length), 0.0);
+                    jacobian.setJac((i+bus.length), (k+bus.length), 0.0);
+                    //jacobian.setJac(i, k, 0.0);
+                    //jacobian.setJac((k+bus.length), (k+bus.length), 0.0);
+                }
+            }
+        }
+    }
+
     //check if algorithm has successfully converged
-    //NOTE: adjust error is not consided in this algorithm
+    //NOTE: adjust error is not considered in this algorithm
     private boolean convergeCheck(Bus[] bus) {
         isConverge = true;
 
@@ -83,7 +150,7 @@ public class NewtonRaphsonLoadFlow {
                 //check real power mismatch only
                 if (Math.abs(deltaPower[i]) > convergeError) {
                     isConverge = false;
-                    System.out.println("\nGeneration bus " + bus[i].getBusID() + "ΔP > ε\n");
+                    System.out.println("Generation bus " + bus[i].getBusID() + "ΔP > ε");
                 }
             } else { // load bus (PQ bus)
                 //check both real and reactive power mismatches
@@ -93,10 +160,10 @@ public class NewtonRaphsonLoadFlow {
 
                 if (Math.abs(deltaPower[i]) > convergeError) {
                     isConverge = false;
-                    System.out.println("\nLoad bus " + bus[i].getBusID() + "ΔP > ε\n");
+                    System.out.println("Load bus " + bus[i].getBusID() + "ΔP > ε");
                 } else {
                     isConverge = false;
-                    System.out.println("\nLoad bus " + bus[i].getBusID() + "ΔQ > ε\n");
+                    System.out.println("Load bus " + bus[i].getBusID() + "ΔQ > ε");
                 }
             }
         }
@@ -112,6 +179,7 @@ public class NewtonRaphsonLoadFlow {
         }
     }
 
+    // A*B matrix multiplication
     private double[] determineMatrixMultiplication(double[][] a, double[] b) {
         Matrix aMatrix = new Matrix(a);
         Matrix bMatrix = new Matrix(b, b.length);

@@ -1,5 +1,7 @@
 package networkModel;
 
+import constants.Constants;
+
 public final class Bus {
 
     private int busIndex;
@@ -25,8 +27,8 @@ public final class Bus {
         busIndex = busCounter;
         busID=busParameters[0];
         busType=busParameters[1];
-        realPowerDemand=busParameters[2];
-        reactivePowerDemand=busParameters[3];
+        realPowerDemand=busParameters[2]/ Constants.MVABASE;
+        reactivePowerDemand=busParameters[3]/Constants.MVABASE;
         shuntConductance=busParameters[4];
         shuntSuceptance=busParameters[5];
         busArea=busParameters[6];

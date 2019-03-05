@@ -1,5 +1,8 @@
 package networkModel;
 
+import com.sun.xml.internal.bind.v2.runtime.reflect.opt.Const;
+import constants.Constants;
+
 public class Generation {
 
     public int genCounter=0;
@@ -37,13 +40,13 @@ public class Generation {
 
     public Generation(double [] genParameters) {
         genIndex = genCounter;
+        baseMVA = genParameters[6];
         busID = genParameters[0];
-        realPowerOutput = genParameters[1];
-        reactivePowerOutput = genParameters[2];
+        realPowerOutput = genParameters[1]/ Constants.MVABASE;
+        reactivePowerOutput = genParameters[2]/ Constants.MVABASE;
         maxReactivePowerOutput = genParameters[3];
         minReactivePowerOutput = genParameters[4];
         voltageMagnitudeSetpoint = genParameters[5];
-        baseMVA = genParameters[6];
         genStatus = genParameters[7];
         maxRealPowerOutput = genParameters[9];
         minRealPowerOutput = genParameters[9];
@@ -66,7 +69,7 @@ public class Generation {
     }
 
     public double getRealPowerOutput() {
-        return realPowerOutput;
+        return realPowerOutput/100;
     }
 
     public double getReactivePowerOutput() {
