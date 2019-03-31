@@ -46,6 +46,7 @@ public class OptimalPowerFlowAC {
                 0.001, false);
         nrpf.solve(bus, generation, branch);
 
+
         simulationTimer(System.nanoTime()-timer);
     }   // end main
 

@@ -51,8 +51,9 @@ public class NewtonRaphsonLoadFlow {
 
             JacobianMatrixTest jacobian = new JacobianMatrixTest(yMatrix, bus, generation, branch);
             jacobian.printJac();
+            jacobian.printSimplifiedJac();
             deltaPower = jacobian.getDeltaPower();
-
+            printDeltaPower();
 
 
             if (convergeCheck(bus) || iterations == maxIterations){
@@ -62,10 +63,12 @@ public class NewtonRaphsonLoadFlow {
                 }
                 break;
             }
-            //jacInverse = determineMatrixInverse(jacobian.getJac());
-            //deltaVoltage = determineMatrixMultiplication(jacInverse, deltaPower);
 
-            //updateVoltageValues(bus, deltaVoltage);
+            jacInverse = determineMatrixInverse(jacobian.getSimplifiedJac());
+            deltaVoltage = determineMatrixMultiplication(jacInverse, deltaPower);
+            printDeltaVoltage();
+
+            updateVoltageValues(bus, deltaVoltage, jacobian.getBusFlag());
 
 
             /*
@@ -97,6 +100,52 @@ public class NewtonRaphsonLoadFlow {
             */
         }
         return false;
+    }
+
+    private void printDeltaVoltage() {
+        try{
+            System.out.println();
+            System.out.println("=====================================================================");
+            System.out.println("====================    Delta Voltage Matrix    =====================");
+            System.out.println("=====================================================================");
+
+            double rows = deltaVoltage.length;
+            //double columns = deltaPower[0].length;
+            String str = "|\t";
+
+            for(int i=0;i<rows;i++){
+                //for(int j=0;j<columns;j++){
+                str += deltaVoltage[i] + "\t";
+                // }
+
+                System.out.println(str + "|");
+                str = "|\t";
+            }
+
+        }catch(Exception e){System.out.println("Matrix is empty!!");}
+    }
+
+    private void printDeltaPower() {
+        try{
+            System.out.println();
+            System.out.println("=====================================================================");
+            System.out.println("=======================    Delta Power Matrix    =======================");
+            System.out.println("=====================================================================");
+
+            double rows = deltaPower.length;
+            //double columns = deltaPower[0].length;
+            String str = "|\t";
+
+            for(int i=0;i<rows;i++){
+                //for(int j=0;j<columns;j++){
+                    str += deltaPower[i] + "\t";
+               // }
+
+                System.out.println(str + "|");
+                str = "|\t";
+            }
+
+        }catch(Exception e){System.out.println("Matrix is empty!!");}
     }
 
     private void simplifyJac() {
@@ -170,12 +219,26 @@ public class NewtonRaphsonLoadFlow {
         return isConverge;
     }
 
-    private void updateVoltageValues(Bus[] bus, double[] deltaVoltage) {
-        for (int i=0; i<bus.length; i++){
-            double angle = bus[i].getVoltageAngle();
-            double voltage = bus[i].getVoltageMagnitude();
-            bus[i].setVoltageAngle(angle+deltaVoltage[i]);
-            bus[i].setVoltageMagnitude(voltage+deltaVoltage[i+bus.length]);
+    private void updateVoltageValues(Bus[] bus, double[] deltaVoltage, boolean[] busFlag) {
+        boolean[] realPowerFlag = new boolean[bus.length];
+        boolean[] reactivePowerFlag = new boolean[bus.length];
+
+        System.out.println();
+        for (int k=0; k<bus.length; k++){
+            realPowerFlag[k] = busFlag[k];
+            reactivePowerFlag[k] = busFlag[k+bus.length];
+        }
+        for (int k=0; k<bus.length; k++){
+            if (realPowerFlag[k]){
+                double angle = bus[k].getVoltageAngle();
+                bus[k].setVoltageAngle(angle+deltaVoltage[k]);
+                System.out.println("New Voltage angle at bus "+bus[k].getBusID()+" ="+bus[k].getVoltageAngle());
+            }
+            if (reactivePowerFlag[k]){
+                double voltage = bus[k].getVoltageMagnitude();
+                bus[k].setVoltageMagnitude(voltage+deltaVoltage[k]);
+                System.out.println("New Voltage magnitude at bus "+bus[k].getBusID()+" ="+bus[k].getVoltageMagnitude());
+            }
         }
     }
 
